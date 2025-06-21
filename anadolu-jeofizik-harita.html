@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Harita Görseli Ayarlayıcı</title>
+    <title>Harita Görseli Sabit</title>
     <meta charset="utf-8" />
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgxGzBPYfDmMjd99KcdbdTrVah1s15TP4"></script>
     <style>
@@ -42,7 +42,7 @@
 
     <script>
       let overlay;
-      let bounds = {
+      const bounds = {
         north: 41.078744,
         south: 40.928750,
         east: 29.323376,
@@ -74,25 +74,6 @@
         };
         document.getElementById("output").textContent = JSON.stringify(formatted, null, 2);
       }
-
-      const rectangle = new google.maps.Rectangle({
-        bounds: bounds,
-        editable: true,
-        draggable: true,
-        map: map
-      });
-
-      rectangle.addListener('bounds_changed', () => {
-        const newBounds = rectangle.getBounds();
-        bounds = {
-          north: newBounds.getNorthEast().lat(),
-          south: newBounds.getSouthWest().lat(),
-          east: newBounds.getNorthEast().lng(),
-          west: newBounds.getSouthWest().lng()
-        };
-        drawOverlay(bounds);
-        updateOutput(bounds);
-      });
 
       drawOverlay(bounds);
       updateOutput(bounds);
