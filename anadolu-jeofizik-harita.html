@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harita Görseli Ayarlayıcı</title>
+    <meta charset="utf-8" />
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgxGzBPYfDmMjd99KcdbdTrVah1s15TP4"></script>
+    <style>
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: white;
+        padding: 10px;
+        z-index: 9999;
+        font-family: sans-serif;
+        font-size: 14px;
+        line-height: 1.4em;
+        width: 260px;
+      }
+      #output {
+        margin-top: 10px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        background: #f4f4f4;
+        padding: 6px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <button onclick="logBounds()">📋 Koordinatları Kopyala</button>
+      <div id="output">Koordinatlar burada görünecek...</div>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+      let overlay;
+      let bounds = {
+        north: 41.078744,
+        south: 40.928750,
+        east: 29.323376,
+        west: 28.943778
+      };
+
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 41.003, lng: 29.13 },
+        zoom: 11,
+        mapTypeId: 'hybrid'
+      });
+
+      function drawOverlay(bounds) {
+        if (overlay) overlay.setMap(null);
+        overlay = new google.maps.GroundOverlay(
+          "https://i.imgur.com/otP6eft.jpeg?ts=" + Date.now(),
+          bounds,
+          { opacity: 0.65 }
+        );
+        overlay.setMap(map);
+      }
+
+      function updateOutput(bounds) {
+        const formatted = {
+          north: bounds.north.toFixed(6),
+          south: bounds.south.toFixed(6),
+          east: bounds.east.toFixed(6),
+          west: bounds.west.toFixed(6)
+        };
+        document.getElementById("output").textContent = JSON.stringify(formatted, null, 2);
+      }
+
+      const rectangle = new google.maps.Rectangle({
+        bounds: bounds,
+        editable: true,
+        draggable: true,
+        map: map
+      });
+
+      rectangle.addListener('bounds_changed', () => {
+        const newBounds = rectangle.getBounds();
+        bounds = {
+          north: newBounds.getNorthEast().lat(),
+          south: newBounds.getSouthWest().lat(),
+          east: newBounds.getNorthEast().lng(),
+          west: newBounds.getSouthWest().lng()
+        };
+        drawOverlay(bounds);
+        updateOutput(bounds);
+      });
+
+      drawOverlay(bounds);
+      updateOutput(bounds);
+
+      function logBounds() {
+        const text = document.getElementById("output").textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Koordinatlar panoya kopyalandı!\n\n" + text);
+        });
+      }
+    </script>
+  </body>
+</html>
